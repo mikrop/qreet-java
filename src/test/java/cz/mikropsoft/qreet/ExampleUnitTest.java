@@ -6,6 +6,7 @@ import net.glxn.qrgen.core.image.ImageType;
 import net.glxn.qrgen.javase.QRCode;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -61,6 +62,7 @@ public class ExampleUnitTest {
     }
 
     @Test
+    @Ignore
     public void parseQreet() throws Exception {
         EetUctenka uctenka = EetUctenka.parse(UCTENKA_CODE);
         Assert.assertEquals(this.uctenka.toString(), uctenka.toString());
