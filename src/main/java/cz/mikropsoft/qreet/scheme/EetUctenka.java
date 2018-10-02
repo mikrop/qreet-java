@@ -2,8 +2,9 @@ package cz.mikropsoft.qreet.scheme;
 
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
+import cz.mikropsoft.qreet.utils.StringUtils;
 import net.glxn.qrgen.core.scheme.Schema;
-import net.glxn.qrgen.core.scheme.SchemeUtil;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -11,31 +12,20 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * EET účtenka.
  */
 public class EetUctenka extends Schema {
 
-    protected static final String FIK = "FIK";
-    protected static final String BKP = "BKP";
-    protected static final String DIC = "DIC";
-    protected static final String KC = "KC";
-    protected static final String DT = "DT";
-    protected static final String R = "R";
+    private static final DateTimeFormatter DATUM_CAS_TRANSAKCE_FORMAT = DateTimeFormatter.ofPattern("uuMMddHHmm");
 
-    private static final String VERSION = "1.0";
-    private static final DateTimeFormatter DATUM_CAS_TRANSAKCE_FORMAT = DateTimeFormatter.ofPattern("uuuuMMddHHmm");
-
-    private String fik;
-    private String bkp;
-    private String dic;
-    private double castka;
+    private Rezim rezim;
     private LocalDate datumTransakce;
     private LocalTime casTransakce;
-    private Rezim rezim;
+    private String dic;
+    private Kod kod;
+    private double castka;
 
     /**
      * Účtenka kód pro účely účtenkové loterie.
@@ -47,17 +37,23 @@ public class EetUctenka extends Schema {
     public EetUctenka(@Nullable String fik, @Nullable String bkp, @NotNull String dic, double castka, @NotNull LocalDate datumTransakce,
                       @NotNull LocalTime casTransakce, @NotNull Rezim rezim) {
 
-        if (fik == null && bkp == null) {
-            throw new IllegalArgumentException("FIK, nebo BKP musí být předán");
-        }
-
-        this.fik = fik;
-        this.bkp = bkp;
-        this.dic = dic;
-        this.castka = castka;
+        this.rezim = rezim;
         this.datumTransakce = datumTransakce;
         this.casTransakce = casTransakce;
-        this.rezim = rezim;
+        this.dic = StringUtils.parseDic(dic);
+
+        if (fik == null && bkp == null) {
+            throw new IllegalArgumentException("FIK, nebo BKP musí být předán");
+        } else {
+            if (fik != null) {
+                this.kod = Kod.encodeFik(fik);
+            } else if (bkp != null) {
+                this.kod = Kod.encodeBkp(bkp);
+            } else {
+                throw new IllegalArgumentException("");
+            }
+        }
+        this.castka = castka;
     }
 
     public EetUctenka(@Nullable String fik, @Nullable String bkp, @NotNull String dic, double castka,
@@ -66,12 +62,12 @@ public class EetUctenka extends Schema {
     }
 
     /**
-     * Označení verze QR EET.
+     * Verze QR kódu.
      *
-     * @return verze
+     * @return {@link Verze}
      */
-    public static String getVersion() {
-        return VERSION;
+    public Integer getVerze() {
+        return new Verze.Builder(kod.getTyp(), this.dic).build();
     }
 
     /**
@@ -79,51 +75,26 @@ public class EetUctenka extends Schema {
      *
      * @return FIK
      */
-    public String getFik() {
-        if (fik == null && bkp == null) {
-            throw new IllegalArgumentException("FIK musí být předán");
-        }
-        return fik;
+    public Kod getKod() {
+        return kod;
     }
 
-    public void setFik(@Nullable String fik) {
-        this.fik = fik;
+    public void setKod(@Nullable Kod kod) {
+        this.kod = kod;
     }
 
     /**
-     * 16 znaků z množiny [A-F0-9] BKP kód, prvních 16 znaků (2 skupiny) bez mezer či pomlček.
-     *
-     * @return BKP
-     */
-    public String getBkp() {
-        if (fik == null && bkp == null) {
-            throw new IllegalArgumentException("BKP musí být předán");
-        }
-        return bkp;
-    }
-
-    public void setBkp(@Nullable String bkp) {
-        this.bkp = bkp;
-    }
-
-    /**
-     * 8-10 číslic DIČ, bez předpony "CZ".
+     * 8-10 číslic DIČ.
      *
      * @return DIČ
      */
+    @Nullable
     public String getDic() {
-        if (dic == null) {
-            throw new IllegalArgumentException("DIČ musí být předán");
-        } else {
-            if (dic.startsWith("CZ")) {
-                return dic.substring(2, dic.length());
-            }
-            return dic;
-        }
+        return dic;
     }
 
     public void setDic(@NotNull String dic) {
-        this.dic = dic;
+        this.dic = StringUtils.parseDic(dic);
     }
 
     /**
@@ -132,13 +103,14 @@ public class EetUctenka extends Schema {
      *
      * @return částka
      */
-    private String getKc() {
+    private String getCastka() {
         if (castka <= 0) {
             throw new IllegalArgumentException("Částka musí být větší než nula");
         }
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-        symbols.setDecimalSeparator('.');
-        DecimalFormat CASTKA_FORMAT = new DecimalFormat("###,###,###.00", symbols);
+        symbols.setDecimalSeparator(Character.MIN_VALUE);
+        DecimalFormat CASTKA_FORMAT = new DecimalFormat("#.00", symbols);
+        CASTKA_FORMAT.setDecimalSeparatorAlwaysShown(false);
         return CASTKA_FORMAT.format(castka);
     }
 
@@ -149,9 +121,9 @@ public class EetUctenka extends Schema {
     /**
      * 12 číslic datum a čas tržby ve formátu {@link #DATUM_CAS_TRANSAKCE_FORMAT}, formát ISO 8601.
      *
-     * @return datum a čas tržby
+     * @return datum a čas transakce
      */
-    private String getDt() {
+    private String getDatum() {
         if (datumTransakce == null) {
             throw new IllegalArgumentException("Datum transakce musí být předán");
         } else if (casTransakce == null) {
@@ -175,11 +147,11 @@ public class EetUctenka extends Schema {
      *
      * @return režim
      */
-    private String getR() {
+    private String getRezim() {
         if (rezim == null) {
             throw new IllegalArgumentException("Režim musí být předán");
         }
-        return rezim.name();
+        return rezim.getValue();
     }
 
     public void setRezim(@NotNull Rezim rezim) {
@@ -193,40 +165,10 @@ public class EetUctenka extends Schema {
 
     @Override
     public Schema parseSchema(String code) {
-        if (code != null && code.toUpperCase().startsWith("EET*" + EetUctenka.getVersion())) {
-            Map<String, String> parameters = SchemeUtil.getParameters(code.toUpperCase(), "\\*");
-            if (parameters.containsKey(FIK)) {
-                this.setFik(parameters.get(FIK));
-            }
-
-            if (parameters.containsKey(BKP)) {
-                this.setBkp(parameters.get(BKP));
-            }
-
-            if (parameters.containsKey(DIC)) {
-                this.setDic(parameters.get(DIC));
-            }
-
-            if (parameters.containsKey(KC)) {
-                String s = parameters.get(KC);
-                this.setCastka(Double.parseDouble(s));
-            }
-
-            if (parameters.containsKey(DT)) {
-                String s = parameters.get(DT);
-                LocalDateTime datumCasTransakce = LocalDateTime.parse(s, DATUM_CAS_TRANSAKCE_FORMAT);
-                this.setDatumTransakce(datumCasTransakce.toLocalDate());
-                this.setCasTransakce(datumCasTransakce.toLocalTime());
-            }
-
-            if (parameters.containsKey(R)) {
-                String name = parameters.get(R);
-                this.setRezim(Rezim.valueOf(name));
-            }
-
-            return this;
+        if (code != null) {
+            throw new NotImplementedException();
         } else {
-            throw new IllegalArgumentException("this is not a valid EET účtenka code: " + code);
+            throw new IllegalArgumentException("Toto není validní QR kód EET účtenky: " + code);
         }
     }
 
@@ -244,31 +186,18 @@ public class EetUctenka extends Schema {
 
     @Override
     public String generateString() {
-        Map<String, Object> parameters = new LinkedHashMap<>();
 
-        String fik = getFik();
-        if (fik != null) {
-            parameters.put(FIK, fik);
+        // VERZE : REŽIM TRŽBY: DATUM : DIČ: KÓDY : ČÁSTKA
+        StringBuilder sb = new StringBuilder();
+        sb.append(getVerze());
+        sb.append(getRezim());
+        sb.append(getDatum());
+        String dic = getDic();
+        if (dic != null) {
+            sb.append(dic);
         }
-
-        String bkp = getBkp();
-        if (bkp != null) {
-            parameters.put(BKP, bkp);
-        }
-
-        parameters.put(DIC, getDic());
-        parameters.put(KC, getKc());
-        parameters.put(DT, getDt());
-        parameters.put(R, getR());
-
-        final StringBuilder sb = new StringBuilder("EET*");
-        sb.append(EetUctenka.getVersion());
-        for (Map.Entry<String, Object> entry: parameters.entrySet()) {
-            sb.append("*")
-                    .append(entry.getKey())
-                    .append(":")
-                    .append(entry.getValue());
-        }
+        sb.append(getKod().getValue());
+        sb.append(getCastka());
         return sb.toString();
     }
 

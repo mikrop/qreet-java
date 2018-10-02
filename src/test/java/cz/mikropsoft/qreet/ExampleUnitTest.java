@@ -23,24 +23,34 @@ import static org.junit.Assert.assertNotNull;
  */
 public class ExampleUnitTest {
 
-    private static final String UCTENKA_CODE = "EET*1.0*BKP:DE7AB57EF9F1B523*DIC:45316872*KC:117.00*DT:201809281015*R:B";
+    /*
+        Pouze povinné položky
+            Pro FIK - 1101705061401074323134400085176503411300
+            Pro BKP - 2101705061401168333761836002264103411300
+
+        S nepovinnou položku DIČ
+            Pro FIK - 14017050614017900110063074323134400085176503411300
+            Pro BKP - 24017050614017900110063168333761836002264103411300
+     */
+    private static final String UCTENKA_CODE = "24017050614017900110063168333761836002264103411300";
 
     private static final DateTimeFormatter DATUM_TRANSAKCE_FORMAT = DateTimeFormatter.ofPattern("uuuu.MM.dd");
-    private static final LocalDate datumTransakce = LocalDate.parse("2018.09.28", DATUM_TRANSAKCE_FORMAT);
+    private static final LocalDate datumTransakce = LocalDate.parse("2017.05.06", DATUM_TRANSAKCE_FORMAT);
     private static final DateTimeFormatter CAS_TRANSAKCE_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
-    private static final LocalTime casTransakce = LocalTime.parse("10:15", CAS_TRANSAKCE_FORMAT);
+    private static final LocalTime casTransakce = LocalTime.parse("14:01", CAS_TRANSAKCE_FORMAT);
 
     private EetUctenka uctenka;
 
     @Before
     public void init() {
-        this.uctenka = new EetUctenka(null,
-                "DE7AB57EF9F1B523",
-                "45316872",
-                117d,
+        this.uctenka = new EetUctenka(
+                /*"2c4ccf70-0055-44f2-804e-3056786dd351-ff"*/ null,
+                "6455B192-D697186A-6AB1971A-1E9B146B-CDD5007B",
+                "CZ7900110063",
+                34113.00d,
                 datumTransakce,
                 casTransakce,
-                Rezim.B
+                Rezim.BEZNY
         );
     }
 
