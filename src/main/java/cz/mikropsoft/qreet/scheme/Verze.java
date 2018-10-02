@@ -1,8 +1,5 @@
 package cz.mikropsoft.qreet.scheme;
 
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
-
 /**
  * Dvě číslice, každá nabývající hodnoty 1-9, číselník ovlivňující formát výsledného kódu, přípustné hodnoty:
  *
@@ -30,44 +27,47 @@ import com.sun.istack.internal.Nullable;
 public class Verze {
 
     /**
-     * Builder pro jednodušší sestavení čísla verze;
+     * Číselná reprezentace {@link Verze}.
+     *
+     * @param kod fiskální identifikační kód (FIK), nebo bezpečnostní kód poplatníka (BKP)
+     * @param dic DIČ poplatníka
+     * @return verze
      */
-    public static class Builder {
+    private static Integer ofTypAndDic(Kod kod, String dic) {
+        StringBuilder sb = new StringBuilder();
 
-        private Kod.Typ typ;
-        private String dic;
-
-        public Builder(@NotNull Kod.Typ typ, @Nullable String dic) {
-            this.typ = typ;
-            this.dic = dic;
+        Kod.Typ typ = kod.getTyp();
+        if (typ == null) {
+            throw new IllegalArgumentException("Attribut kód (FIK, nebo BKP) musí být předán");
+        } else {
+            sb.append(typ.getValue());
         }
 
-        public Integer build() {
-
-            String verze;
-
-            if (typ == null) {
-                throw new IllegalArgumentException("Attribut kód (FIK, nebo BKP) musí být předán");
+        if (dic == null) {
+            sb.append("1");
+        } else {
+            int length = dic.length();
+            if (length == 8) {
+                sb.append("2");
+            } else if (length == 9) {
+                sb.append("3");
+            } else if (length == 10) {
+                sb.append("4");
             } else {
-                verze = typ.getValue();
+                throw new IllegalArgumentException("Attribut DIČ nebyl přenán, nebo má neplatnou délku.");
             }
-
-            if (dic == null) {
-                verze += "1";
-            } else {
-                int length = dic.length();
-                if (length == 8) {
-                    verze += "2";
-                } else if (length == 9) {
-                    verze += "3";
-                } else if (length == 10) {
-                    verze += "4";
-                } else {
-                    throw new IllegalArgumentException("Attribut DIČ nebyl přenán, nebo má neplatnou délku.");
-                }
-            }
-            return Integer.valueOf(verze);
         }
+        return Integer.valueOf(sb.toString());
+    }
+
+    /**
+     * Číselná reprezentace {@link Verze}.
+     *
+     * @param uctenka zdrojová účtenka
+     * @return verze
+     */
+    public static Integer ofUctenka(EetUctenka uctenka) {
+        return Verze.ofTypAndDic(uctenka.getKod(), uctenka.getDic());
     }
 
 }

@@ -1,7 +1,5 @@
 package cz.mikropsoft.qreet.scheme;
 
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
 import cz.mikropsoft.qreet.utils.StringUtils;
 import net.glxn.qrgen.core.scheme.Schema;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -12,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 /**
  * EET účtenka.
@@ -34,8 +33,8 @@ public class EetUctenka extends Schema {
         super();
     }
 
-    public EetUctenka(@Nullable String fik, @Nullable String bkp, @NotNull String dic, double castka, @NotNull LocalDate datumTransakce,
-                      @NotNull LocalTime casTransakce, @NotNull Rezim rezim) {
+    public EetUctenka(String fik, String bkp, String dic, double castka, LocalDate datumTransakce,
+                      LocalTime casTransakce, Rezim rezim) {
 
         this.rezim = rezim;
         this.datumTransakce = datumTransakce;
@@ -56,8 +55,8 @@ public class EetUctenka extends Schema {
         this.castka = castka;
     }
 
-    public EetUctenka(@Nullable String fik, @Nullable String bkp, @NotNull String dic, double castka,
-                      @NotNull LocalDateTime datumCasTransakce, @NotNull Rezim rezim) {
+    public EetUctenka(String fik, String bkp, String dic, double castka,
+                      LocalDateTime datumCasTransakce, Rezim rezim) {
         this(fik, bkp, dic, castka, datumCasTransakce.toLocalDate(), datumCasTransakce.toLocalTime(), rezim);
     }
 
@@ -67,7 +66,7 @@ public class EetUctenka extends Schema {
      * @return {@link Verze}
      */
     public Integer getVerze() {
-        return new Verze.Builder(kod.getTyp(), this.dic).build();
+        return Verze.ofUctenka(this);
     }
 
     /**
@@ -79,7 +78,7 @@ public class EetUctenka extends Schema {
         return kod;
     }
 
-    public void setKod(@Nullable Kod kod) {
+    public void setKod(Kod kod) {
         this.kod = kod;
     }
 
@@ -88,12 +87,11 @@ public class EetUctenka extends Schema {
      *
      * @return DIČ
      */
-    @Nullable
     public String getDic() {
         return dic;
     }
 
-    public void setDic(@NotNull String dic) {
+    public void setDic(String dic) {
         this.dic = StringUtils.parseDic(dic);
     }
 
@@ -104,14 +102,9 @@ public class EetUctenka extends Schema {
      * @return částka
      */
     private String getCastka() {
-        if (castka <= 0) {
-            throw new IllegalArgumentException("Částka musí být větší než nula");
-        }
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-        symbols.setDecimalSeparator(Character.MIN_VALUE);
-        DecimalFormat CASTKA_FORMAT = new DecimalFormat("#.00", symbols);
-        CASTKA_FORMAT.setDecimalSeparatorAlwaysShown(false);
-        return CASTKA_FORMAT.format(castka);
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("cs", "CZ"));
+        DecimalFormat CASTKA_FORMAT = new DecimalFormat("##0.00", symbols);
+        return CASTKA_FORMAT.format(castka).replace(",", "");
     }
 
     public void setCastka(double castka) {
@@ -134,11 +127,11 @@ public class EetUctenka extends Schema {
         }
     }
 
-    public void setDatumTransakce(@NotNull LocalDate datumTransakce) {
+    public void setDatumTransakce(LocalDate datumTransakce) {
         this.datumTransakce = datumTransakce;
     }
 
-    public void setCasTransakce(@NotNull LocalTime casTransakce) {
+    public void setCasTransakce(LocalTime casTransakce) {
         this.casTransakce = casTransakce;
     }
 
@@ -154,7 +147,7 @@ public class EetUctenka extends Schema {
         return rezim.getValue();
     }
 
-    public void setRezim(@NotNull Rezim rezim) {
+    public void setRezim(Rezim rezim) {
         this.rezim = rezim;
     }
 

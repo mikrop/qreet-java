@@ -1,8 +1,5 @@
 package cz.mikropsoft.qreet.utils;
 
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,7 +16,7 @@ public final class StringUtils {
      * @param n maximální počet znaků, na které bude text doplněn
      * @return výsledek transformace
      */
-    private static String encodeLeftPad(@NotNull String s, int n) {
+    private static String encodeLeftPad(String s, int n) {
         long l = Long.parseLong(s.trim(), 16);
         return String.format("%1$" + n + "s", l).replace(' ', '0');
     }
@@ -27,7 +24,7 @@ public final class StringUtils {
     /**
      * @see #encodeLeftPad(String, int)
      */
-    private static String encodeLeftPad10(@NotNull String s) {
+    private static String encodeLeftPad10(String s) {
         return encodeLeftPad(s, 10);
     }
 
@@ -38,7 +35,7 @@ public final class StringUtils {
      * @param fik zdroj
      * @return první tři skupiny
      */
-    public static String encodeFik(@NotNull String fik) {
+    public static String encodeFik(String fik) {
 
         if (fik == null) {
             throw new IllegalArgumentException("Hodnota FIK musí být předána.");
@@ -63,7 +60,7 @@ public final class StringUtils {
      * @param bkp zdroj
      * @return první dvě skupiny
      */
-    public static String encodeBkp(@NotNull String bkp) {
+    public static String encodeBkp(String bkp) {
 
         if (bkp == null) {
             throw new IllegalArgumentException("Hodnota BKP musí být předána.");
@@ -86,7 +83,6 @@ public final class StringUtils {
      * @param dic zdroj
      * @return vypasovaný DIČ
      */
-    @Nullable
     public static String parseDic(String dic) {
 
         if (dic != null) {

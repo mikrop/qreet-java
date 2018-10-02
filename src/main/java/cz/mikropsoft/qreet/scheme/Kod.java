@@ -1,6 +1,5 @@
 package cz.mikropsoft.qreet.scheme;
 
-import com.sun.istack.internal.Nullable;
 import cz.mikropsoft.qreet.utils.StringUtils;
 
 /**
@@ -52,7 +51,6 @@ public class Kod {
      *
      * @return 20 číslic dekadické soustavy a doplněny zleva nulami
      */
-    @Nullable
     public String getValue() {
         return value;
     }
