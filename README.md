@@ -7,9 +7,3 @@ QR EET JAVA
 ======
 
 JAVA standard pro snadné zpracování údajů na účtenkách registrovaných v systému EET.
-
-Poděkování
-======
-
-Tento projekt využívá [QRGen](https://github.com/kenglxn/QRGen), který generování QR kódu maximálně zjednodušuje. 
-S využitím popisu z projektu [QR EET](https://github.com/martinsuchan/qreet), za který také díky.
