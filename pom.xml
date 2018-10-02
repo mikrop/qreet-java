@@ -10,7 +10,7 @@
 
     <groupId>com.github.mikrop.qreet</groupId>
     <artifactId>qreet-java</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <name>qreet-java</name>
     <description>Java standard pro snadné zpracování údajů na účtenkách registrovaných v systému EET.</description>
