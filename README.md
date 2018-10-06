@@ -6,4 +6,4 @@
 QR EET JAVA
 ======
 
-JAVA standard pro snadné zpracování údajů na účtenkách registrovaných v systému EET.
+JAVA implementace QR kódů pro EET účtenky dle [oficiální specifikace](http://www.etrzby.cz/assets/cs/prilohy/Specifikace-QR-kodu.pdf) pro snadné zpracování údajů na účtenkách registrovaných v systému EET.

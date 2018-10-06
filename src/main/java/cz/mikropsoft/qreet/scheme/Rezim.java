@@ -27,4 +27,19 @@ public enum Rezim {
         return value;
     }
 
+    /**
+     * {@link Rezim} na základě předaného value.
+     *
+     * @param value hodnota
+     * @return {@link Rezim}
+     */
+    public static Rezim parse(String value) {
+        for (Rezim rezim : Rezim.values()) {
+            if (rezim.getValue().equals(value)) {
+                return rezim;
+            }
+        }
+        return null;
+    }
+
 }

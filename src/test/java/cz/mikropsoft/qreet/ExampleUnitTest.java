@@ -6,7 +6,6 @@ import net.glxn.qrgen.core.image.ImageType;
 import net.glxn.qrgen.javase.QRCode;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -25,6 +24,13 @@ import static org.junit.Assert.assertNotNull;
 public class ExampleUnitTest {
 
     /*
+        Datum a čas přijetí tržby: 2017-05-06T14:01:10+02:00
+        Celková částka tržby: 34113,00,- Kč
+        Režim tržby: běžný
+        BKP kód: 6455B192-D697186A-6AB1971A-1E9B146B-CDD5007B
+        FIK kód: 2c4ccf70-0055-44f2-804e-3056786dd351-ff
+        DIČ poplatníka: CZ7900110063
+
         Pouze povinné položky
             Pro FIK - 1101705061401074323134400085176503411300
             Pro BKP - 2101705061401168333761836002264103411300
@@ -55,6 +61,29 @@ public class ExampleUnitTest {
         );
     }
 
+    /**
+     * Spojí předaná čísla a převede je do hexadecimálního tvaru.
+     *
+     * @param prvni zdroj
+     * @param druhe další číslo
+     * @return BKP v hexadecimálním tvaru
+     */
+    private static String toHexBkp(Long prvni, Long druhe) {
+        return (Long.toHexString(prvni) + "-" + Long.toHexString(druhe)).toUpperCase();
+    }
+
+    @Test
+    public void toHexString() throws Exception {
+
+        String bkp = "16833376183600226410";
+        Long prvni = 1683337618L;
+        Long druhe = 3600226410L;
+        String hex = "6455B192-D697186A"; // -6AB1971A-1E9B146B-CDD5007B
+        String dst = ExampleUnitTest.toHexBkp(prvni, druhe);
+
+        assertEquals(hex, dst);
+    }
+
     @Test
     public void qreetToString() throws Exception {
         String text = uctenka.toString();
@@ -62,7 +91,6 @@ public class ExampleUnitTest {
     }
 
     @Test
-    @Ignore
     public void parseQreet() throws Exception {
         EetUctenka uctenka = EetUctenka.parse(UCTENKA_CODE);
         Assert.assertEquals(this.uctenka.toString(), uctenka.toString());
