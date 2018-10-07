@@ -1,7 +1,5 @@
 package cz.mikropsoft.qreet.utils;
 
-import com.sun.istack.internal.Nullable;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,7 +14,6 @@ public final class StringUtils {
      * @param dic zdroj
      * @return vypasovaný DIČ
      */
-    @Nullable
     public static String parseDic(String dic) {
 
         if (dic != null) {
