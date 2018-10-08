@@ -8,7 +8,9 @@ import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,15 +44,24 @@ public class EetUctenka extends Schema {
         super();
     }
 
-    private EetUctenka(Kod kod, String dic, double castka, LocalDate datumTransakce,
-                       LocalTime casTransakce, Rezim rezim) {
+    public EetUctenka(Kod kod, String dic, double castka, Date datumCasTransakce, Rezim rezim) {
+
+        LocalDateTime ldt = LocalDateTime.ofInstant(datumCasTransakce.toInstant(), ZoneId.systemDefault());
 
         this.rezim = rezim;
-        this.datumTransakce = datumTransakce;
-        this.casTransakce = casTransakce;
+        this.datumTransakce = ldt.toLocalDate();
+        this.casTransakce = ldt.toLocalTime();
         this.dic = StringUtils.parseDic(dic);
         this.kod = kod;
         this.castka = castka;
+    }
+
+    private EetUctenka(Kod kod, String dic, double castka, LocalDate datumTransakce,
+                       LocalTime casTransakce, Rezim rezim) {
+
+        this(kod, dic, castka,
+                Date.from(LocalDateTime.of(datumTransakce, casTransakce).atZone(ZoneId.systemDefault()).toInstant()),
+                rezim);
     }
 
     public EetUctenka(Kod kod, String dic, double castka, LocalDateTime datumCasTransakce, Rezim rezim) {
