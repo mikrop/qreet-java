@@ -14,7 +14,7 @@ public class Kod {
     private static final char KOD_SEPARATOR = '-';
 
     /** 8-4-4-4-12-2 */
-    private static final Pattern FIK_PATTERN = Pattern.compile("^([0-9A-F]{8})-([0-9A-F]{4})(-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}-[0-9A-F]{2})?$");
+    private static final Pattern FIK_PATTERN = Pattern.compile("^([0-9A-F]{8})-([0-9A-F]{4})-([0-9A-F]{4})(-[0-9A-F]{4}-[0-9A-F]{12}-[0-9A-F]{2})?$");
     private static final Pattern DECODE_FIK_PATTERN = Pattern.compile("^(\\d{10})(\\d{5})(\\d{5})$");
 
     /** 8-8-8-8-8 */
@@ -221,7 +221,7 @@ public class Kod {
             sb.append(Kod.encodeLeftPad(matcher.group(3), 5));
             return sb.toString();
         }
-        throw new IllegalArgumentException("Předaný FIK neodpovídá vzoru \"xxxxxxxx-xxxx-xxxx[-xxxx-xxxxxxxxxxxx-xx]\"");
+        throw new IllegalArgumentException("Předaný FIK: " + value + ", neodpovídá vzoru \"xxxxxxxx-xxxx-xxxx\"");
     }
 
     /**
@@ -244,7 +244,7 @@ public class Kod {
             sb.append(Kod.encodeLeftPad10(matcher.group(2)));
             return sb.toString();
         }
-        throw new IllegalArgumentException("Předaný BKP neodpovídá vzoru \"xxxxxxxx-xxxxxxxx[-xxxxxxxx-xxxxxxxx-xxxxxxxx]\"");
+        throw new IllegalArgumentException("Předaný BKP: " + value + ", neodpovídá vzoru \"xxxxxxxx-xxxxxxxx\"");
     }
 
     /**
@@ -288,7 +288,7 @@ public class Kod {
             sb.append(Kod.decodeLeftPad(matcher.group(3)));
             return Kod.ofFik(sb.toString());
         }
-        throw new IllegalArgumentException("Předaný FIK neodpovídá vzoru \"xxxxxxxx-xxxx-xxxx\"");
+        throw new IllegalArgumentException("Předaný FIK: " + value + ", neodpovídá vzoru \"xxxxxxxx-xxxx-xxxx\"");
     }
 
     /**
@@ -312,7 +312,7 @@ public class Kod {
             sb.append(Kod.decodeLeftPad(matcher.group(2)));
             return Kod.ofBkp(sb.toString());
         }
-        throw new IllegalArgumentException("Předaný BKP neodpovídá vzoru \"xxxxxxxx-xxxxxxxx\"");
+        throw new IllegalArgumentException("Předaný BKP: " + value + ", neodpovídá vzoru \"xxxxxxxx-xxxxxxxx\"");
     }
 
     @Override
