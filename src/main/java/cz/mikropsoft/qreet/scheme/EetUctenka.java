@@ -5,11 +5,7 @@ import net.glxn.qrgen.core.scheme.Schema;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -21,7 +17,7 @@ import java.util.regex.Pattern;
 public class EetUctenka extends Schema {
 
     // Vzor data s časem
-    private static final DateTimeFormatter DATUM_CAS_TRANSAKCE_FORMAT = DateTimeFormatter.ofPattern("uuMMddHHmm");
+    public static final SimpleDateFormat DATUM_CAS_TRANSAKCE_FORMAT = new SimpleDateFormat("yyMMddHHmm");
 
     /**
      * VERZE : REŽIM TRŽBY : DATUM      : DIČ        : KÓDY                 : ČÁSTKA
@@ -31,8 +27,7 @@ public class EetUctenka extends Schema {
     private static final Pattern QR_PATTERN = Pattern.compile("^(\\d{2})(\\d{1})(\\d{10})(\\d{10})(\\d{20})(\\d+)");
 
     private Rezim rezim;
-    private LocalDate datumTransakce;
-    private LocalTime casTransakce;
+    private Date datumCasTransakce;
     private String dic;
     private Kod kod;
     private double castka;
@@ -45,32 +40,15 @@ public class EetUctenka extends Schema {
     }
 
     public EetUctenka(Kod kod, String dic, double castka, Date datumCasTransakce, Rezim rezim) {
-
-        LocalDateTime ldt = LocalDateTime.ofInstant(datumCasTransakce.toInstant(), ZoneId.systemDefault());
-
         this.rezim = rezim;
-        this.datumTransakce = ldt.toLocalDate();
-        this.casTransakce = ldt.toLocalTime();
+        this.datumCasTransakce = datumCasTransakce;
         this.dic = StringUtils.parseDic(dic);
         this.kod = kod;
         this.castka = castka;
     }
 
-    private EetUctenka(Kod kod, String dic, double castka, LocalDate datumTransakce,
-                       LocalTime casTransakce, Rezim rezim) {
-
-        this(kod, dic, castka,
-                Date.from(LocalDateTime.of(datumTransakce, casTransakce).atZone(ZoneId.systemDefault()).toInstant()),
-                rezim);
-    }
-
-    public EetUctenka(Kod kod, String dic, double castka, LocalDateTime datumCasTransakce, Rezim rezim) {
-        this(kod, dic, castka, datumCasTransakce.toLocalDate(), datumCasTransakce.toLocalTime(), rezim);
-    }
-
-    public EetUctenka(String fik, String bkp, String dic, double castka, LocalDate datumTransakce,
-                      LocalTime casTransakce, Rezim rezim) {
-        this(Kod.create(fik, bkp), dic, castka, datumTransakce, casTransakce, rezim);
+    public EetUctenka(String fik, String bkp, String dic, double castka, Date datumCasTransakce, Rezim rezim) {
+        this(Kod.create(fik, bkp), dic, castka, datumCasTransakce, rezim);
     }
 
     /**
@@ -118,13 +96,10 @@ public class EetUctenka extends Schema {
      * @return datum a čas transakce
      */
     private String getDatum() {
-        if (datumTransakce == null) {
+        if (datumCasTransakce == null) {
             throw new IllegalArgumentException("Datum transakce musí být předán");
-        } else if (casTransakce == null) {
-            throw new IllegalArgumentException("Čas transakce musí být předán");
         } else {
-            LocalDateTime dt = LocalDateTime.of(datumTransakce, casTransakce);
-            return DATUM_CAS_TRANSAKCE_FORMAT.format(dt);
+            return DATUM_CAS_TRANSAKCE_FORMAT.format(datumCasTransakce);
         }
     }
 
@@ -154,11 +129,8 @@ public class EetUctenka extends Schema {
 
                 Verze verze = Verze.parse(matcher.group(1));
                 this.rezim = Rezim.parse(matcher.group(2));
-
-                LocalDateTime datumCasTransakce = LocalDateTime.parse(matcher.group(3), DATUM_CAS_TRANSAKCE_FORMAT);
-                this.datumTransakce = datumCasTransakce.toLocalDate();
-                this.casTransakce = datumCasTransakce.toLocalTime();
-
+                this.datumCasTransakce = StringUtils
+                            .parseDatumCasTransakce(matcher.group(3), DATUM_CAS_TRANSAKCE_FORMAT);
                 this.dic = StringUtils.parseDic(matcher.group(4));
 
                 Kod.Typ typ = verze.getTyp();

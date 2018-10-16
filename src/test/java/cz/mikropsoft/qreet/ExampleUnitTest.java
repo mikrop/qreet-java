@@ -2,6 +2,7 @@ package cz.mikropsoft.qreet;
 
 import cz.mikropsoft.qreet.scheme.EetUctenka;
 import cz.mikropsoft.qreet.scheme.Rezim;
+import cz.mikropsoft.qreet.utils.StringUtils;
 import net.glxn.qrgen.core.image.ImageType;
 import net.glxn.qrgen.javase.QRCode;
 import org.junit.Assert;
@@ -9,10 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
+import static cz.mikropsoft.qreet.scheme.EetUctenka.DATUM_CAS_TRANSAKCE_FORMAT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -41,11 +40,6 @@ public class ExampleUnitTest {
      */
     private static final String UCTENKA_CODE = "24017050614017900110063168333761836002264103411300";
 
-    private static final DateTimeFormatter DATUM_TRANSAKCE_FORMAT = DateTimeFormatter.ofPattern("uuuu.MM.dd");
-    private static final LocalDate datumTransakce = LocalDate.parse("2017.05.06", DATUM_TRANSAKCE_FORMAT);
-    private static final DateTimeFormatter CAS_TRANSAKCE_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
-    private static final LocalTime casTransakce = LocalTime.parse("14:01", CAS_TRANSAKCE_FORMAT);
-
     private EetUctenka uctenka;
 
     @Before
@@ -55,8 +49,7 @@ public class ExampleUnitTest {
                 "6455B192-D697186A-6AB1971A-1E9B146B-CDD5007B",
                 "CZ7900110063",
                 34113.00d,
-                datumTransakce,
-                casTransakce,
+                StringUtils.parseDatumCasTransakce("1705061401", DATUM_CAS_TRANSAKCE_FORMAT),
                 Rezim.BEZNY
         );
     }
