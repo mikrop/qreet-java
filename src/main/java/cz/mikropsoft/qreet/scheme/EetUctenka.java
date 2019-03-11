@@ -13,6 +13,9 @@ import java.util.regex.Pattern;
 
 /**
  * EET účtenka.
+ *
+ * @author Michal Hájek, <a href="mailto:mikrop@centrum.cz">mikrop@centrum.cz</a>
+ * @since 09.03.2019
  */
 public class EetUctenka extends Schema {
 
@@ -28,7 +31,7 @@ public class EetUctenka extends Schema {
 
     private Rezim rezim;
     private Date datumCasTransakce;
-    private String dic;
+    private Dic dic;
     private Kod kod;
     private double castka;
 
@@ -39,55 +42,53 @@ public class EetUctenka extends Schema {
         super();
     }
 
-    public EetUctenka(Kod kod, String dic, double castka, Date datumCasTransakce, Rezim rezim) {
-        this.rezim = rezim;
-        this.datumCasTransakce = datumCasTransakce;
-        this.dic = StringUtils.parseDic(dic);
+    /**
+     * Privátní konstruktor.
+     *
+     * @param kod FIK nebo BKP
+     * @param dic DIČ poplatníka - tato položka není povinná
+     * @param castka zaplaceno
+     * @param datumCasTransakce datum a čas kdy byla platba provedena
+     * @param rezim režim v jakém byla účtenka vystavena
+     */
+    private EetUctenka(Kod kod, String dic, double castka, Date datumCasTransakce, Rezim rezim) {
         this.kod = kod;
+        this.dic = Dic.parse(dic);
         this.castka = castka;
-    }
-
-    public EetUctenka(String fik, String bkp, String dic, double castka, Date datumCasTransakce, Rezim rezim) {
-        this(Kod.create(fik, bkp), dic, castka, datumCasTransakce, rezim);
-    }
-
-    /**
-     * Verze QR kódu.
-     *
-     * @return {@link Verze}
-     */
-    public Integer getVerze() {
-        return Verze.ofUctenka(this);
+        this.datumCasTransakce = datumCasTransakce;
+        this.rezim = rezim;
     }
 
     /**
-     * Celkem tedy 20 číslic.
-     *
-     * @return FIK
+     * @see EetUctenka (Kod, String, double, Date, Rezim)
      */
-    public Kod getKod() {
-        return kod;
+    public static EetUctenka ofFik(String fik, String dic, double castka, Date datumCasTransakce, Rezim rezim) {
+        return new EetUctenka(Kod.ofFik(fik), dic, castka, datumCasTransakce, rezim);
     }
 
     /**
-     * 8-10 číslic DIČ.
-     *
-     * @return DIČ
+     * @see EetUctenka (Kod, String, double, Date, Rezim)
      */
-    public String getDic() {
-        return dic;
+    public static EetUctenka ofBkp(String bkp, String dic, double castka, Date datumCasTransakce, Rezim rezim) {
+        return new EetUctenka(Kod.ofBkp(bkp), dic, castka, datumCasTransakce, rezim);
     }
 
     /**
-     * 1-10 znaků z množiny [0-9.] cena na účtence v Kč. Desetinné číslo, max. 2 desetinné cifry, Tečka jako oddělovač desetinných míst.
-     * Maximální možná hodnota je 9 999 999.99
+     * Zakódovaná verze v dekadické soustavě (2 číslice).
      *
-     * @return částka
+     * @return 2 číslice dekadické soustavy
      */
-    private String getCastka() {
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("cs", "CZ"));
-        DecimalFormat CASTKA_FORMAT = new DecimalFormat("##0.00", symbols);
-        return CASTKA_FORMAT.format(castka).replace(",", "");
+    private Verze getVerze() {
+        return new Verze(kod.getTyp(), dic.getVerze());
+    }
+
+    /**
+     * Vrací {@link Rezim} v jakém byla účtenka vystavena.
+     *
+     * @return režim
+     */
+    private Rezim getRezim() {
+        return rezim;
     }
 
     /**
@@ -95,7 +96,7 @@ public class EetUctenka extends Schema {
      *
      * @return datum a čas transakce
      */
-    private String getDatum() {
+    private String qrDatum() {
         if (datumCasTransakce == null) {
             throw new IllegalArgumentException("Datum transakce musí být předán");
         } else {
@@ -104,100 +105,77 @@ public class EetUctenka extends Schema {
     }
 
     /**
-     * Vrací {@link Rezim} v jakém byla účtenka vystavena.
+     * 8-10 číslic DIČ.
      *
-     * @return režim
+     * @return DIČ poplatníka
      */
-    private String getRezim() {
-        if (rezim == null) {
-            throw new IllegalArgumentException("Režim musí být předán");
-        }
-        return rezim.getValue();
+    private Dic getDic() {
+        return dic;
+    }
+
+    /**
+     * Kód FIK nebo BKP.
+     *
+     * @return {@link Kod}
+     */
+    private Kod getKod() {
+        return kod;
+    }
+
+    /**
+     * 1-10 znaků z množiny [0-9.] cena na účtence v Kč. Desetinné číslo, max. 2 desetinné cifry, Tečka jako oddělovač desetinných míst.
+     * Maximální možná hodnota je 9 999 999.99
+     *
+     * @return částka
+     */
+    private String qrCastka() {
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("cs", "CZ"));
+        DecimalFormat CASTKA_FORMAT = new DecimalFormat("##0.00", symbols);
+        return CASTKA_FORMAT.format(castka).replace(",", "");
     }
 
     @Override
-    public String toString() {
-        return generateString();
-    }
+    public Schema parseSchema(String value) {
+        if (value != null) {
 
-    @Override
-    public Schema parseSchema(String code) {
-        if (code != null) {
-
-            Matcher matcher = QR_PATTERN.matcher(code);
+            Matcher matcher = QR_PATTERN.matcher(value);
             if (matcher.matches()) {
 
                 Verze verze = Verze.parse(matcher.group(1));
                 this.rezim = Rezim.parse(matcher.group(2));
                 this.datumCasTransakce = StringUtils
-                            .parseDatumCasTransakce(matcher.group(3), DATUM_CAS_TRANSAKCE_FORMAT);
-                this.dic = StringUtils.parseDic(matcher.group(4));
-
-                Kod.Typ typ = verze.getTyp();
-                if (typ == null) {
-                    throw new IllegalArgumentException("Typ kódu je null");
-                }
-                String value = matcher.group(5);
-                switch (typ) {
-                    case FIK:
-
-                        /*
-                            2c4ccf70-0055-44f2-804e-3056786dd351-ff
-                            07432313440008517650
-                         */
-                        this.kod = Kod.decodeFik(value);
-                        break;
-                    case BKP:
-
-                        /*
-                            6455B192-D697186A-6AB1971A-1E9B146B-CDD5007B
-                            16833376183600226410
-                         */
-                        this.kod = Kod.decodeBkp(value);
-                        break;
-                    default:
-                        throw new IllegalStateException("Nepodporovaný typ kódu: " + typ);
-                }
-
+                        .parseDatumCasTransakce(matcher.group(3), DATUM_CAS_TRANSAKCE_FORMAT);
+                this.dic = Dic.parse(matcher.group(4));
+                this.kod = Kod.parse(verze.getTyp(), matcher.group(5));
                 String s = matcher.group(6);
                 this.castka = Double.valueOf(s) / 100;
 
                 return this;
             }
-            throw new IllegalArgumentException("Parsování předaného kódu: " + code + ", se nezdařilo");
+            throw new IllegalArgumentException("Parsování předaného kódu: " + value + ", se nezdařilo");
 
         } else {
-            throw new IllegalArgumentException("Toto není validní QR kód EET účtenky: " + code);
+            throw new IllegalArgumentException("Toto není validní QR kód EET účtenky: " + value);
         }
     }
 
     /**
-     * Vaparsuje z předanoho řetězce objekt {@link EetUctenka}.
+     * VERZE : REŽIM TRŽBY : DATUM : DIČ : KÓDY : ČÁSTKA
      *
-     * @param code QR kód pro účely účtenkové loterie
-     * @return {@link EetUctenka}
+     * @return zakódovaná informaci o účtence do QR kódu
      */
-    public static EetUctenka parse(String code) {
-        EetUctenka uctenka = new EetUctenka();
-        uctenka.parseSchema(code);
-        return uctenka;
-    }
-
     @Override
     public String generateString() {
-
-        // VERZE : REŽIM TRŽBY: DATUM : DIČ: KÓDY : ČÁSTKA
         StringBuilder sb = new StringBuilder();
-        sb.append(getVerze());
-        sb.append(getRezim());
-        sb.append(getDatum());
-        String dic = getDic();
-        if (dic != null) {
-            sb.append(dic);
+        sb.append(getVerze().qrValue());
+        sb.append(getRezim().qrValue());
+        sb.append(qrDatum());
+        Dic dic = getDic();
+        if (dic.isNotEmpty()) {
+            sb.append(dic.qrValue());
         }
-        sb.append(getKod().encode());
-        sb.append(getCastka());
+        sb.append(getKod().qrValue());
+        sb.append(qrCastka());
         return sb.toString();
     }
-
 }

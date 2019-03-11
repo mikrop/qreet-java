@@ -4,6 +4,7 @@ import cz.mikropsoft.qreet.scheme.EetUctenka;
 import cz.mikropsoft.qreet.scheme.Rezim;
 import cz.mikropsoft.qreet.utils.StringUtils;
 import net.glxn.qrgen.core.image.ImageType;
+import net.glxn.qrgen.core.scheme.Schema;
 import net.glxn.qrgen.javase.QRCode;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,19 +40,26 @@ public class ExampleUnitTest {
             Pro BKP - 24017050614017900110063168333761836002264103411300
      */
     private static final String UCTENKA_CODE = "24017050614017900110063168333761836002264103411300";
+    private static final EetUctenka FIK = EetUctenka.ofFik(
+            "2c4ccf70-0055-44f2-804e-3056786dd351-ff",
+            "CZ7900110063",
+            34113.00d,
+            StringUtils.parseDatumCasTransakce("1705061401", DATUM_CAS_TRANSAKCE_FORMAT),
+            Rezim.BEZNY
+    );
+    private static final EetUctenka BKP = EetUctenka.ofBkp(
+            "6455B192-D697186A-6AB1971A-1E9B146B-CDD5007B",
+            "CZ7900110063",
+            34113.00d,
+            StringUtils.parseDatumCasTransakce("1705061401", DATUM_CAS_TRANSAKCE_FORMAT),
+            Rezim.BEZNY
+    );
 
     private EetUctenka uctenka;
 
     @Before
     public void init() {
-        this.uctenka = new EetUctenka(
-                /*"2c4ccf70-0055-44f2-804e-3056786dd351-ff"*/ null,
-                "6455B192-D697186A-6AB1971A-1E9B146B-CDD5007B",
-                "CZ7900110063",
-                34113.00d,
-                StringUtils.parseDatumCasTransakce("1705061401", DATUM_CAS_TRANSAKCE_FORMAT),
-                Rezim.BEZNY
-        );
+        this.uctenka = /*(Math.random() < 0.5) ? FIK :*/ BKP;
     }
 
     /**
@@ -78,15 +86,15 @@ public class ExampleUnitTest {
     }
 
     @Test
-    public void qreetToString() throws Exception {
-        String text = uctenka.toString();
+    public void generateString() throws Exception {
+        String text = uctenka.generateString();
         assertEquals(UCTENKA_CODE, text);
     }
 
     @Test
-    public void parseQreet() throws Exception {
-        EetUctenka uctenka = EetUctenka.parse(UCTENKA_CODE);
-        Assert.assertEquals(this.uctenka.toString(), uctenka.toString());
+    public void parseSchema() throws Exception {
+        Schema uctenka = new EetUctenka().parseSchema(UCTENKA_CODE);
+        Assert.assertEquals(this.uctenka.generateString(), uctenka.generateString());
     }
 
     @Test

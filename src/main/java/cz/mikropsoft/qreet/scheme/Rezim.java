@@ -6,7 +6,7 @@ package cz.mikropsoft.qreet.scheme;
  * @author Michal Hájek, <a href="mailto:mikrop@centrum.cz">mikrop@centrum.cz</a>
  * @since 30.09.2018
  */
-public enum Rezim {
+public enum Rezim implements QrEet {
     BEZNY("0"),
     ZJEDNODUSENY("1")
     ;
@@ -23,7 +23,7 @@ public enum Rezim {
      *
      * @return dekadická číslice
      */
-    public String getValue() {
+    public String qrValue() {
         return value;
     }
 
@@ -35,11 +35,10 @@ public enum Rezim {
      */
     public static Rezim parse(String value) {
         for (Rezim rezim : Rezim.values()) {
-            if (rezim.getValue().equals(value)) {
+            if (rezim.qrValue().equals(value)) {
                 return rezim;
             }
         }
         return null;
     }
-
 }
