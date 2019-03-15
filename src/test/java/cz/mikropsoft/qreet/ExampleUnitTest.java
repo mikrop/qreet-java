@@ -6,7 +6,6 @@ import cz.mikropsoft.qreet.utils.StringUtils;
 import net.glxn.qrgen.core.image.ImageType;
 import net.glxn.qrgen.core.scheme.Schema;
 import net.glxn.qrgen.javase.QRCode;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -94,13 +93,13 @@ public class ExampleUnitTest {
     @Test
     public void parseSchema() throws Exception {
         Schema uctenka = new EetUctenka().parseSchema(UCTENKA_CODE);
-        Assert.assertEquals(this.uctenka.generateString(), uctenka.generateString());
+        assertEquals(this.uctenka.generateString(), uctenka.generateString());
     }
 
     @Test
     public void qreetToFile() throws Exception {
 
-        String text = uctenka.toString();
+        String text = uctenka.generateString();
         File file = QRCode.from(text)
                 .to(ImageType.JPG).file("QRCode.jpg");
         assertNotNull(file);
