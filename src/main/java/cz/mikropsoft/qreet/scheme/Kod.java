@@ -277,8 +277,8 @@ public class Kod implements QrEet {
      * Vrací {@link Kod} na základě předaného value.
      *
      * @param typ předaného kódu
-     * @param value
-     * @return
+     * @param value hodnota bezpečnostního kód poplatníka, nebo fiskálního identifikačního kódu
+     * @return naplněný {@link Kod}
      */
     public static Kod parse(Kod.Typ typ, String value) {
 

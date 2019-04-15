@@ -46,7 +46,7 @@ public class EetUctenka extends Schema {
      * Privátní konstruktor.
      *
      * @param kod FIK nebo BKP
-     * @param dic DIČ poplatníka - tato položka není povinná
+     * @param dic nepovinný DIČ poplatníka
      * @param castka zaplaceno
      * @param datumCasTransakce datum a čas kdy byla platba provedena
      * @param rezim režim v jakém byla účtenka vystavena
@@ -60,6 +60,14 @@ public class EetUctenka extends Schema {
     }
 
     /**
+     * Statická factory k vytvoření {@link EetUctenka} s fiskálním identifikačním kódem.
+     *
+     * @param fik fiskální identifikační kód
+     * @param dic nepovinný DIČ poplatníka
+     * @param castka zaplaceno
+     * @param datumCasTransakce datum a čas kdy byla platba provedena
+     * @param rezim režim v jakém byla účtenka vystavena
+     * @return naplněná {@link EetUctenka}
      * @see EetUctenka (Kod, String, double, Date, Rezim)
      */
     public static EetUctenka ofFik(String fik, String dic, double castka, Date datumCasTransakce, Rezim rezim) {
@@ -67,6 +75,14 @@ public class EetUctenka extends Schema {
     }
 
     /**
+     * Statická factory k vytvoření {@link EetUctenka} s bezpečnostním kódem poplatníka.
+     *
+     * @param bkp bezpečnostní kód poplatníka
+     * @param dic nepovinný DIČ poplatníka
+     * @param castka zaplaceno
+     * @param datumCasTransakce datum a čas kdy byla platba provedena
+     * @param rezim režim v jakém byla účtenka vystavena
+     * @return naplněná {@link EetUctenka}
      * @see EetUctenka (Kod, String, double, Date, Rezim)
      */
     public static EetUctenka ofBkp(String bkp, String dic, double castka, Date datumCasTransakce, Rezim rezim) {
