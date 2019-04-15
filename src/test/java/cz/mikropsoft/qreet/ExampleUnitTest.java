@@ -3,17 +3,14 @@ package cz.mikropsoft.qreet;
 import cz.mikropsoft.qreet.scheme.EetUctenka;
 import cz.mikropsoft.qreet.scheme.Rezim;
 import cz.mikropsoft.qreet.utils.StringUtils;
-import net.glxn.qrgen.core.image.ImageType;
-import net.glxn.qrgen.core.scheme.Schema;
 import net.glxn.qrgen.javase.QRCode;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.io.FileOutputStream;
 
 import static cz.mikropsoft.qreet.scheme.EetUctenka.DATUM_CAS_TRANSAKCE_FORMAT;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -62,47 +59,30 @@ public class ExampleUnitTest {
     }
 
     /**
-     * Spojí předaná čísla a převede je do hexadecimálního tvaru.
-     *
-     * @param prvni zdroj
-     * @param druhe další číslo
-     * @return BKP v hexadecimálním tvaru
+     * Jak zakódovat informaci o účtence do QR řetězce.
      */
-    private static String toHexBkp(Long prvni, Long druhe) {
-        return (Long.toHexString(prvni) + "-" + Long.toHexString(druhe)).toUpperCase();
-    }
-
-    @Test
-    public void toHexString() throws Exception {
-
-        String bkp = "16833376183600226410";
-        Long prvni = 1683337618L;
-        Long druhe = 3600226410L;
-        String hex = "6455B192-D697186A"; // -6AB1971A-1E9B146B-CDD5007B
-        String dst = ExampleUnitTest.toHexBkp(prvni, druhe);
-
-        assertEquals(hex, dst);
-    }
-
     @Test
     public void generateString() throws Exception {
         String text = uctenka.generateString();
         assertEquals(UCTENKA_CODE, text);
     }
 
+    /**
+     * Jak dekódovat předaný řetězec do objektu {@link EetUctenka}
+     */
     @Test
     public void parseSchema() throws Exception {
-        Schema uctenka = new EetUctenka().parseSchema(UCTENKA_CODE);
+        EetUctenka uctenka = new EetUctenka().parseSchema(UCTENKA_CODE);
         assertEquals(this.uctenka.generateString(), uctenka.generateString());
     }
 
+    /**
+     * Jak uložit QR kód jako obrázek na disk.
+     */
     @Test
     public void qreetToFile() throws Exception {
-
-        String text = uctenka.generateString();
-        File file = QRCode.from(text)
-                .to(ImageType.JPG).file("QRCode.jpg");
-        assertNotNull(file);
+        QRCode.from(uctenka)
+                .writeTo(new FileOutputStream("C:/tmp/QRBKP.jpg"));
     }
 
 }

@@ -134,8 +134,14 @@ public class EetUctenka extends Schema {
         return CASTKA_FORMAT.format(castka).replace(",", "");
     }
 
+    /**
+     * Dekódovat předaný řetězec do objektu {@link EetUctenka}.
+     *
+     * @param value zakódovaná informaci o účtence
+     * @return naplněný objekt {@link EetUctenka}
+     */
     @Override
-    public Schema parseSchema(String value) {
+    public EetUctenka parseSchema(String value) {
         if (value != null) {
 
             Matcher matcher = QR_PATTERN.matcher(value);
@@ -162,7 +168,7 @@ public class EetUctenka extends Schema {
     /**
      * VERZE : REŽIM TRŽBY : DATUM : DIČ : KÓDY : ČÁSTKA
      *
-     * @return zakódovaná informaci o účtence do QR kódu
+     * @return zakódovaná informaci o účtence
      */
     @Override
     public String generateString() {
