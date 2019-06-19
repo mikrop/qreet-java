@@ -31,7 +31,7 @@ public class Verze implements QrEet {
     public static Verze parse(String value) {
 
         if (value == null) {
-            throw new IllegalArgumentException("Číslo verze nebylo předáno.");
+            throw new IllegalArgumentException("Dvojčíslí verze nebylo předáno.");
         } else if (value.length() == 2) {
 
             Kod.Typ typ = Kod.Typ.parse(value.charAt(0));
@@ -39,7 +39,7 @@ public class Verze implements QrEet {
             return new Verze(typ, dic);
 
         } else {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Číslo reprezentující verzi kódu neodpovídá svoji délkou právě dvěma znakům.");
         }
     }
 
@@ -72,6 +72,7 @@ public class Verze implements QrEet {
      *
      * @return 2 číslice dekadické soustavy
      */
+    @Override
     public String qrValue() {
         return typ.qrValue() + dic.qrValue();
     }

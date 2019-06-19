@@ -13,7 +13,12 @@ public enum Rezim implements QrEet {
 
     private final String value;
 
-    private Rezim(String value) {
+    /**
+     * Privátní konstruktor.
+     *
+     * @param value dekadická reprezentace režimu tržby
+     */
+    Rezim(String value) {
         this.value = value;
     }
 
@@ -23,6 +28,7 @@ public enum Rezim implements QrEet {
      *
      * @return dekadická číslice
      */
+    @Override
     public String qrValue() {
         return value;
     }

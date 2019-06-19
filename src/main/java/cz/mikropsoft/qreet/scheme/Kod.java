@@ -43,7 +43,7 @@ public class Kod implements QrEet {
 
         private final String value;
 
-        private Typ(String value) {
+        Typ(String value) {
             this.value = value;
         }
 
@@ -53,6 +53,7 @@ public class Kod implements QrEet {
          *
          * @return dekadická číslice
          */
+        @Override
         public String qrValue() {
             return value;
         }
@@ -89,7 +90,7 @@ public class Kod implements QrEet {
     /**
      * Privátní konstruktor.
      *
-     * @param value FIK nebo BKP
+     * @param value hodnota kódu (FIK nebo BKP)
      * @param typ {@link Kod.Typ}
      */
     private Kod(String value, Kod.Typ typ) {
@@ -176,6 +177,7 @@ public class Kod implements QrEet {
      *
      * @return 20 číslic dekadické soustavy a doplněny zleva nulami
      */
+    @Override
     public String qrValue() {
         StringBuilder sb = new StringBuilder();
         switch (getTyp()) {

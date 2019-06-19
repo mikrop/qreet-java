@@ -34,16 +34,21 @@ public class Dic implements QrEet {
 
         private final String value;
 
-        private Verze(String value) {
+        /**
+         * Privátní konstruktor.
+         *
+         * @param value dekadická formátu DIČ
+         */
+        Verze(String value) {
             this.value = value;
         }
 
         /**
-         * Dekadická číslice s přípustnými hodnotami 0 a 1, kde 0 reprezentuje běžný režim a 1 reprezentuje
-         * zjednodušený režim.
+         * Dekadická číslice formátu DIČ.
          *
          * @return dekadická číslice
          */
+        @Override
         public String qrValue() {
             return value;
         }
@@ -121,6 +126,7 @@ public class Dic implements QrEet {
      *
      * @return dekadická číslice
      */
+    @Override
     public String qrValue() {
         return value;
     }
